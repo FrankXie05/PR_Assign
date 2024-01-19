@@ -1,4 +1,3 @@
-
 from ast import In
 from unittest import result
 from urllib import response
@@ -197,40 +196,21 @@ def main():
     CTI_User_list = ["LilyWangLL","Cheney-W","FrankXie05","jimwang118","JonLiu1993","MonicaLiu0311"] 
     print("首次使用需要你本地配置GitHub CLI, 否则无法完成Assign操作！！！！！！！")
     
-    file_path = 'assignment_log.xlsx'
-    default_pr_count = 20
-    
-    df = pd.read_excel(file_path)
-    try:
-        pr_count_str = df.iloc[0, 0]
-        pr_count = pr_count_str
-    except ValueError:
-        pr_count_str = False
-        pr_count = default_pr_count
-    except FileNotFoundError:
-        pr_count_str = False
-        pr_count = default_pr_count
-    except Exception as e:
-        pr_count_str = False
-        pr_count = default_pr_count
-    
-    if pr_count_str:
-        pr_count = pr_count_str
-    else:
-        print(f"表格 assignment_log.xlsx 中 pr_count 列为空，默认值将被使用")  
+    json_file_path = 'assignment_log.json'
+
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
 
     try:
-        user_to_delete_str = df.iloc[0, 1]
-        pr_count = pr_count_str
-    except ValueError:
-        user_to_delete_str = False
-        user_list = user_list_org
-    except FileNotFoundError:
-        user_to_delete_str = False
-        user_list = user_list_org
-    except Exception as e:
-        user_to_delete_str = False
-        user_list = user_list_org
+        pr_count = data['pr_count']
+    except KeyError:
+        pr_count = 20  
+
+    try:
+        user_to_delete_str = data['user_to_delete_str']
+    except KeyError:
+        user_to_delete_str = None  
+
   
     if user_to_delete_str:
         user_to_delete_list = [user.strip() for user in user_to_delete_str.split(',') if user.strip()]
@@ -247,6 +227,7 @@ def main():
         else:
             print(f"请假列表是空，请检查")
     else:
+        user_list = user_list_org
         print(f"表格 assignment_log.xlsx 中 user_to_delete 列为空，默认值将被使用")               
         
     print(user_list)
