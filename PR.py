@@ -195,6 +195,7 @@ def main():
 
     user_list_org = ["LilyWangLL","Cheney-W","FrankXie05","jimwang118","JonLiu1993","MonicaLiu0311"] 
     CTI_User_list = ["LilyWangLL","Cheney-W","FrankXie05","jimwang118","JonLiu1993","MonicaLiu0311"] 
+    # gh auth login
     print("首次使用需要你本地配置GitHub CLI, 否则无法完成Assign操作！！！！！！！")
     
     file_path = 'assignment_log.xlsx'
