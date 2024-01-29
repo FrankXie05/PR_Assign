@@ -166,7 +166,7 @@ def assign_user_to_pr(vcpkg_url, headers, pr_number, assignee_login):
              if result.returncode == 0:
                  print(f"Assigned {assignee_login} to PR {pr_number}")
              else:
-                 print(f"Failed to assign {assignee_login} to PR {pr_number}. Status code: {response.stderr}")
+                 print(f"Failed to assign {assignee_login} to PR {pr_number}. Status code: {result.stderr}")
     except FileNotFoundError:
         print("GitHub CLI is not installed.")      
         
