@@ -47,7 +47,10 @@ def get_prs(url,headers,count):
     try:
         response = requests.get(url, headers=headers, params = params)
         response.raise_for_status()
-        return response.json()
+        prs = response.json()
+        # Filter out PRs that are closed and not assigned
+        prs = [pr for pr in prs if not (pr['state'] == 'closed' and pr['assignee'] is None)]
+        return prs
     except requests.RequestException as e:
         print(f"获取最新的 {count} PR. 错误代码：{response.status_code}")
         return None
