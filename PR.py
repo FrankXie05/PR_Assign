@@ -47,31 +47,32 @@ def get_prs(url,headers,count):
     try:
         response = requests.get(url, headers=headers, params = params)
         response.raise_for_status()
-        prs = response.json()
-        # Filter out PRs that are closed and not assigned
-        prs = [pr for pr in prs if not (pr['state'] == 'closed' and pr['assignee'] is None)]
-        return prs
+        return response.json()
     except requests.RequestException as e:
         print(f"获取最新的 {count} PR. 错误代码：{response.status_code}")
         return None
 
 def get_pr_info(url, headers, pr_number):
-    pr_re_info = pr_number
-    response = requests.get(f"{url}/{pr_re_info}", headers=headers)
+    while True:
+        pr_re_info = pr_number
+        response = requests.get(f"{url}/{pr_re_info}", headers=headers)
     
-    if response.status_code == 200:
-        pr_re_info = response.json()
+        if response.status_code == 200:
+            pr_re_info = response.json()
         
-        if pr_re_info.get("state") == "open":
-            return pr_re_info
-        else:
+            if pr_re_info.get("state") == "open":
+                return pr_re_info
+            elif pr_re_info.get("state") == "closed":
+                if pr_re_info["assignee"]["login"] is not None:
+                    return pr_re_info
+            else:
+                pr_number += 1
+        elif response.status_code == 404:
+            print(f"pr: {pr_number} 不存在")
             return None
-    elif response.status_code == 404:
-        print(f"pr: {pr_number} 不存在")
-        return None
-    else:
-        print(f" 无法找到pr: {pr_number}, 错误代码：{response.status_code}")
-        return None
+        else:
+            print(f" 无法找到pr: {pr_number}, 错误代码：{response.status_code}")
+            return None
 
 def get_assigenn_from_pr_info(pr_info):
     if pr_info:
@@ -169,7 +170,7 @@ def assign_user_to_pr(vcpkg_url, headers, pr_number, assignee_login):
              if result.returncode == 0:
                  print(f"Assigned {assignee_login} to PR {pr_number}")
              else:
-                 print(f"Failed to assign {assignee_login} to PR {pr_number}. Status code: {result.stderr}")
+                 print(f"Failed to assign {assignee_login} to PR {pr_number}. Status code: {response.stderr}")
     except FileNotFoundError:
         print("GitHub CLI is not installed.")      
         
@@ -195,9 +196,8 @@ def main():
         'Accept': 'application/json'
     }
 
-    user_list_org = ["LilyWangLL","Cheney-W","FrankXie05","jimwang118","JonLiu1993","MonicaLiu0311"] 
-    CTI_User_list = ["LilyWangLL","Cheney-W","FrankXie05","jimwang118","JonLiu1993","MonicaLiu0311"] 
-    # gh auth login
+    user_list_org = [ ] 
+    CTI_User_list = [ ] 
     print("首次使用需要你本地配置GitHub CLI, 否则无法完成Assign操作！！！！！！！")
     
     json_file_path = 'assignment_log.json'
@@ -207,8 +207,11 @@ def main():
 
     try:
         pr_count = data['pr_count']
+        if pr_count is None:
+            pr_count = 20
     except KeyError:
-        pr_count = 20  
+        pr_count = 20 
+     
 
     try:
         user_to_delete_str = data['user_to_delete_str']
